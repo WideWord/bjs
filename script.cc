@@ -76,7 +76,8 @@ Handle<Value> jsGetRenderer(const Arguments& args) {
     obj_templ->Set(String::New("render"), FunctionTemplate::New(jsRenderer_render));
     obj_templ->Set(String::New("setScene"), FunctionTemplate::New(jsRenderer_setScene));
     Handle<Object> res = obj_templ->NewInstance();
-    res->SetInternalField(0, External::New(core->getRenderer()));
+    Renderer* rnd = core->getRenderer();
+    res->SetInternalField(0, External::New(rnd));
     return res;
 }
 
@@ -117,6 +118,23 @@ Handle<Value> jsGetInputDevice(const Arguments& args) {
     obj_templ->Set(String::New("getKeyUp"), FunctionTemplate::New(jsInputDevice_getKeyUp));
     Handle<Object> res = obj_templ->NewInstance();
     res->SetInternalField(0, External::New(core->getInputDevice()));
+    return res;
+}
+
+Handle<Value> jsTimer_deltaTime(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Timer* d = (Timer*)wrap->Value();
+    return Integer::New(d->deltaTime());
+}
+
+Handle<Value> jsGetTimer(const Arguments& args) {
+    HandleScope scope;
+    Handle<ObjectTemplate> obj_templ = ObjectTemplate::New();
+    obj_templ->SetInternalFieldCount(1);
+    obj_templ->Set(String::New("deltaTime"), FunctionTemplate::New(jsTimer_deltaTime));
+    Handle<Object> res = obj_templ->NewInstance();
+    res->SetInternalField(0, External::New(core->getTimer()));
     return res;
 }
 
@@ -168,7 +186,17 @@ Handle<Value> jsSprite_move(const Arguments& args) {
     Sprite* spr = (Sprite*)wrap->Value();
     if (args.Length() < 2)return Undefined();
     if (!args[0]->IsNumber() || !args[1]->IsNumber())return Undefined();
-    spr->move(args[0]->Int32Value(), args[1]->Int32Value());
+    spr->move(args[0]->NumberValue(), args[1]->NumberValue());
+    return Undefined();
+}
+
+Handle<Value> jsSprite_rotate(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Sprite* spr = (Sprite*)wrap->Value();
+    if (args.Length() < 3)return Undefined();
+    if (!args[0]->IsNumber() || !args[1]->IsNumber() || !args[2]->IsNumber())return Undefined();
+    spr->rotate(args[0]->NumberValue(), args[1]->NumberValue(), args[2]->NumberValue());
     return Undefined();
 }
 
@@ -204,6 +232,7 @@ Handle<Value> jsNewSprite(const Arguments& args) {
     obj_templ->SetInternalFieldCount(1);
     obj_templ->Set(String::New("addFrame"), FunctionTemplate::New(jsSprite_addFrame));
     obj_templ->Set(String::New("move"), FunctionTemplate::New(jsSprite_move));
+    obj_templ->Set(String::New("rotate"), FunctionTemplate::New(jsSprite_rotate));
     obj_templ->Set(String::New("show"), FunctionTemplate::New(jsSprite_show));
     obj_templ->Set(String::New("hide"), FunctionTemplate::New(jsSprite_hide));
     obj_templ->Set(String::New("setSpeed"), FunctionTemplate::New(jsSprite_setSpeed));
@@ -254,7 +283,7 @@ Handle<Value> jsInclude(const Arguments& args) {/*int width, int height, bool fu
 
     Handle<ObjectTemplate> global = ObjectTemplate::New();
 
-    global->Set(String::New("api"),api);
+    global->Set(String::New("native"),api);
 
 
     Persistent<Context> context = Context::New(NULL, global);
@@ -306,12 +335,13 @@ void runScript (const char* filename) {
     api->Set(String::New("run"), FunctionTemplate::New(jsRun));
     api->Set(String::New("getRenderer"), FunctionTemplate::New(jsGetRenderer));
     api->Set(String::New("getInputDevice"), FunctionTemplate::New(jsGetInputDevice));
+    api->Set(String::New("getTimer"), FunctionTemplate::New(jsGetTimer));
     api->Set(String::New("newScene"), FunctionTemplate::New(jsNewScene));
     api->Set(String::New("newSprite"), FunctionTemplate::New(jsNewSprite));
     api->Set(String::New("newImage"), FunctionTemplate::New(jsNewImage));
 
 
-    global->Set(String::New("api"),api);
+    global->Set(String::New("native"),api);
     global->Set(String::New("include"),FunctionTemplate::New(jsInclude));
 
     Persistent<Context> context = Context::New(NULL, global);

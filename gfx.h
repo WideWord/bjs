@@ -20,6 +20,8 @@ namespace gfx {
         unsigned texture;
     };
 
+
+
     class Sprite {
         friend class Renderer;
     public:
@@ -28,7 +30,9 @@ namespace gfx {
         void addFrame (Image* img);
         float x;
         float y;
+        float a;
         void move (float dx, float dy);
+        void rotate (float da, float rx, float ry);
         void show ();
         void hide ();
         int z;

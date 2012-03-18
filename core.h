@@ -4,6 +4,7 @@
 
 #include "gfx.h"
 #include "input.h"
+#include "timer.h"
 
 
 namespace bjs {
@@ -11,6 +12,7 @@ namespace bjs {
     public:
         gfx::Renderer* getRenderer();
         input::InputDevice* getInputDevice();
+        Timer* getTimer();
         bool run();
         Core(int w, int h, bool full);
         ~Core();
@@ -18,6 +20,7 @@ namespace bjs {
     private:
         gfx::Renderer* renderer;
         input::InputDevice* inputDevice;
+        Timer* timer;
         bool running;
 
     };

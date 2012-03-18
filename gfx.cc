@@ -1,8 +1,8 @@
 #include "gfx.h"
 #include <SDL_image.h>
 #include <GL/gl.h>
-#include <iostream>
 #include <stdlib.h>
+#include <math.h>
 
 // timer FPS
 int last = 0;
@@ -85,6 +85,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render () {
+
     Sprite** sprites = scene->spriteSort();
     size_t len = scene->spriteLen();
 
@@ -100,14 +101,16 @@ void Renderer::render () {
         float y = spr->y;
         float w = img->w;
         float h = img->h;
-
+        glLoadIdentity();
+        glTranslatef(x, y, 0);
+        glRotatef(spr->a, 0, 0, 1);
         //glColor4ub(255,255,255,225);
         glBindTexture(GL_TEXTURE_2D, img->texture);
         glBegin(GL_TRIANGLE_STRIP);
-            glTexCoord2f(0,0);    glVertex2f(x,y);
-            glTexCoord2f(1,0);    glVertex2f(x+w,y);
-            glTexCoord2f(0,1);    glVertex2f(x,y+h);
-            glTexCoord2f(1,1);    glVertex2f(x+w,y+h);
+            glTexCoord2f(0,0);    glVertex2f(0,0);
+            glTexCoord2f(1,0);    glVertex2f(0+w,0);
+            glTexCoord2f(0,1);    glVertex2f(0,0+h);
+            glTexCoord2f(1,1);    glVertex2f(0+w,0+h);
         glEnd();
         //glColor4ub(255,255,255,255);
     }
@@ -123,7 +126,9 @@ void Renderer::render () {
 }
 
 void Renderer::setScene (Scene* scn) {
+
     scene = scn;
+
 }
 
 
@@ -168,6 +173,7 @@ Sprite::Sprite (Image* img) {
     x = 0;
     y = 0;
     z = 0;
+    a = 0;
     onscr = true;
     lTime = SDL_GetTicks();
     frame = 0;
@@ -184,6 +190,26 @@ void Sprite::addFrame (Image* img) {
 void Sprite::move (float dx, float dy) {
     x += dx;
     y += dy;
+}
+
+void Sprite::rotate (float da, float rx, float ry) {
+
+    float ra = a * 3.14159265f / 180.0f;
+    float rda = da * 3.14159265f / 180.0f;
+
+
+    float ox = rx * cos (ra) - ry * sin (ra);
+    float oy = rx * sin (ra) + ry * cos (ra);
+
+    float oox = -ox;
+    float ooy = -oy;
+
+    float nx = oox * cos (rda) - ooy * sin (rda);
+    float ny = oox * sin (rda) + ooy * cos (rda);
+
+    x += nx + ox;
+    y += ny + oy;
+    a += da;
 }
 
 void Sprite::show () {
