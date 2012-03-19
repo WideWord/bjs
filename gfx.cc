@@ -116,7 +116,7 @@ void Renderer::render () {
     }
 
     SDL_GL_SwapBuffers();
-
+    delete[] sprites;
     //TimerFPS
     framerate++;
     if (GetTime()) {

@@ -6,6 +6,7 @@ using namespace gfx;
 using namespace input;
 using namespace bjs;
 
+
 Core::Core(int w, int h, bool full) {
     running = true;
     if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )

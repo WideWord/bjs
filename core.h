@@ -5,6 +5,7 @@
 #include "gfx.h"
 #include "input.h"
 #include "timer.h"
+#include <Box2D/Box2D.h>
 
 
 namespace bjs {

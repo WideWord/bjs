@@ -226,6 +226,33 @@ Handle<Value> jsSprite_setSpeed(const Arguments& args) {
     return Undefined();
 }
 
+Handle<Value> jsSprite_setPosition(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Sprite* spr = (Sprite*)wrap->Value();
+    if (args.Length() < 1)return Undefined();
+
+    spr->x = args[0]->ToObject()->Get(String::New("x"))->NumberValue();
+    spr->y = args[0]->ToObject()->Get(String::New("y"))->NumberValue();
+    return True();
+}
+
+Handle<Value> jsSprite_getPosition(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Sprite* spr = (Sprite*)wrap->Value();
+
+    Handle<ObjectTemplate> obj_templ = ObjectTemplate::New();
+    obj_templ->SetInternalFieldCount(1);
+    obj_templ->Set(String::New("x"), Number::New(spr->x));
+    obj_templ->Set(String::New("y"), Number::New(spr->y));
+
+    Handle<Object> res = obj_templ->NewInstance();
+
+    return res;
+}
+
+
 Handle<Value> jsNewSprite(const Arguments& args) {
     HandleScope scope;
     Handle<ObjectTemplate> obj_templ = ObjectTemplate::New();
@@ -236,6 +263,8 @@ Handle<Value> jsNewSprite(const Arguments& args) {
     obj_templ->Set(String::New("show"), FunctionTemplate::New(jsSprite_show));
     obj_templ->Set(String::New("hide"), FunctionTemplate::New(jsSprite_hide));
     obj_templ->Set(String::New("setSpeed"), FunctionTemplate::New(jsSprite_setSpeed));
+    obj_templ->Set(String::New("getPosition"), FunctionTemplate::New(jsSprite_getPosition));
+    obj_templ->Set(String::New("setPosition"), FunctionTemplate::New(jsSprite_setPosition));
     Handle<Object> res = obj_templ->NewInstance();
 
     if (args.Length() < 1)return Undefined();
@@ -254,12 +283,31 @@ Handle<Value> jsImage_free(const Arguments& args) {
     return Undefined();
 }
 
+Handle<Value> jsImage_getW(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Image* img = (Image*)wrap->Value();
+
+
+    return Number::New(img->w);
+}
+
+Handle<Value> jsImage_getH(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Image* img = (Image*)wrap->Value();
+
+
+    return Number::New(img->h);
+}
+
 Handle<Value> jsNewImage(const Arguments& args) {
     HandleScope scope;
     Handle<ObjectTemplate> obj_templ = ObjectTemplate::New();
     obj_templ->SetInternalFieldCount(1);
     obj_templ->Set(String::New("free"), FunctionTemplate::New(jsImage_free));
-
+    obj_templ->Set(String::New("getW"), FunctionTemplate::New(jsImage_getW));
+    obj_templ->Set(String::New("getH"), FunctionTemplate::New(jsImage_getH));
 
     Handle<Object> res = obj_templ->NewInstance();
 
@@ -324,6 +372,8 @@ char* readFile(const char* file_name) {
     return s;
 }
 
+#include "physics.h"
+
 void runScript (const char* filename) {
     HandleScope handle_scope;
     Handle<ObjectTemplate> global = ObjectTemplate::New();
@@ -340,6 +390,7 @@ void runScript (const char* filename) {
     api->Set(String::New("newSprite"), FunctionTemplate::New(jsNewSprite));
     api->Set(String::New("newImage"), FunctionTemplate::New(jsNewImage));
 
+    api->Set(String::New("createPhysicsWorld"), FunctionTemplate::New(jsCreatePhysicsWorld));
 
     global->Set(String::New("native"),api);
     global->Set(String::New("include"),FunctionTemplate::New(jsInclude));
