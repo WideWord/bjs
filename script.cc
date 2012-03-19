@@ -252,6 +252,13 @@ Handle<Value> jsSprite_getPosition(const Arguments& args) {
     return res;
 }
 
+Handle<Value> jsSprite_getAngle(const Arguments& args) {
+    Local<Object> self = args.Holder();
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    Sprite* spr = (Sprite*)wrap->Value();
+
+    return Number::New(spr->a);
+}
 
 Handle<Value> jsNewSprite(const Arguments& args) {
     HandleScope scope;
@@ -264,6 +271,7 @@ Handle<Value> jsNewSprite(const Arguments& args) {
     obj_templ->Set(String::New("hide"), FunctionTemplate::New(jsSprite_hide));
     obj_templ->Set(String::New("setSpeed"), FunctionTemplate::New(jsSprite_setSpeed));
     obj_templ->Set(String::New("getPosition"), FunctionTemplate::New(jsSprite_getPosition));
+    obj_templ->Set(String::New("getAngle"), FunctionTemplate::New(jsSprite_getAngle));
     obj_templ->Set(String::New("setPosition"), FunctionTemplate::New(jsSprite_setPosition));
     Handle<Object> res = obj_templ->NewInstance();
 
